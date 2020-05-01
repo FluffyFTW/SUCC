@@ -32,6 +32,8 @@ launch = False
 start = True
 missed = False
 hit = False
+lock = True
+end = False
 # game stuff
 score = 0
 lives = 5
@@ -69,17 +71,17 @@ def redraw():
     scoreText = font.render("Score: " + str(score), 1, (0, 0, 0))
     livesText = font.render("Lives: " + str(lives), 1, (0, 0, 0))
     slingImg = pygame.image.load('slingshot.png')
+    miss = font.render("You Missed :(", 1, (0, 0, 0))
     if lives == 0:
-        missed = False
         font = pygame.font.SysFont("leelawadeeui", 100, True)
         gameover = font.render("Game Over", 1, (0, 0, 0))
         win.blit(gameover, (240, 200))
         font = pygame.font.SysFont("ebrima", 50, True)
         finalscore = font.render("Your Score is " + str(score), 1, (0, 0, 0))
         win.blit(finalscore, (270, 320))
+        miss = font.render(" ", 1, (0, 0, 0))
     if missed:
         font = pygame.font.SysFont("leelawadeeui", 100, True)
-        miss = font.render("You Missed :(", 1, (0,0,0))
         win.blit(miss, (220, 200))
 
     if hit:
@@ -102,22 +104,18 @@ while run:
         if event.type == pygame.QUIT:
             run = False
     keys = pygame.key.get_pressed()
-    # useless code
-    '''if keys[pygame.K_LEFT] & (x> vel & x < 500):
-       x = x-vel
-    if keys[pygame.K_RIGHT] & (x> vel & x < 500):
-        x = x + vel
-    if keys[pygame.K_UP] & (y < vel & y < 500):
-        y = y-vel
-    if keys[pygame.K_DOWN] & (y > vel & y < 500):
-        y = y+vel'''
     # launch
-
-    if keys[pygame.K_SPACE] and start == False:
+    if keys[pygame.K_SPACE] and start == False and lock and end == False:
         launch = True
+        lock = False
         Vx = Vtot * math.cos(angle)
         Vy = -Vtot * math.sin(angle)
     # movement x independent from y
+    if keys[pygame.K_LEFT]:
+        xtarget -= 5
+
+    if keys[pygame.K_RIGHT]:
+        xtarget += 5
 
     if fall and launch:
         x += int(Vx * t)
@@ -131,7 +129,7 @@ while run:
             score += 1
             fall = False
         # miss
-        if y >= 670:
+        elif y >= 670:
             fall = False
             redraw()
             missed = True
@@ -148,8 +146,8 @@ while run:
         missed = False
         start = False
         hit = False
-        score = 0
-        lives = 5
+        lock = True
+
     if keys[pygame.K_UP]:
         angle += math.pi / 180
         if angle > math.pi / 2:
@@ -167,11 +165,10 @@ while run:
 
         redraw()
         start = False
-    if keys[pygame.K_LEFT]:
-        xtarget -= 5
-    if keys[pygame.K_RIGHT]:
-        xtarget += 5
+
     if keys[pygame.K_ESCAPE]:
+        run = False
+    if lives == 0:
         end = True
 
     if start:
